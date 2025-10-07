@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OneSpark 星火 ☕</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="OneSpark 星火">
+  <meta name="theme-color" content="#ff8800">
+  <style>
+    body { font-family: -apple-system, system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
+           margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           background:#fff6e6; color:#3a2a22; }
+    .card { text-align:center; padding:28px 22px; border-radius:16px;
+            background:#ffffffcc; backdrop-filter: blur(6px);
+            box-shadow: 0 8px 28px rgba(0,0,0,.12); width:min(92vw,520px); }
+    h1 { margin:10px 0 6px; font-size:28px; }
+    p { margin:0 0 18px; opacity:.8; }
+    button { font-size:18px; padding:12px 20px; border-radius:12px; border:0;
+             background:#ff8800; color:#fff; cursor:pointer; }
+    button:active { transform: scale(0.98); }
+    .logo { width:92px; height:92px; border-radius:24px; background:#ff8800 url('icons/icon-192.png') center/80% no-repeat; margin:0 auto 8px; }
+    footer { position:fixed; bottom:10px; width:100%; text-align:center; font-size:12px; opacity:.6; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"></div>
+    <h1>☕ OneSpark 星火</h1>
+    <p>星火任務中心：下載與資料管理</p>
+    <button id="run">啟動星火下載器</button>
+    <p style="font-size:12px;opacity:.7;margin-top:12px;">若未安裝捷徑：請先建立「OneSpark 星火 下載器 ☕️ v1.1」捷徑</p>
+  </div>
+  <footer>可用「分享 → 加到主畫面」安裝 App</footer>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    }
+    document.getElementById('run').addEventListener('click', () => {
+      const name = 'OneSpark 星火 下載器 ☕️ v1.1';
+      const url = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name);
+      window.location.href = url;
+    });
+  </script>
+</body>
+</html>
