@@ -41,7 +41,7 @@
       navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
     document.getElementById('run').addEventListener('click', () => {
-      const name = 'OneSpark 星火 下載器 ☕️ v1.1';
+      const name = 'OneSpark 星火 下載器';
       const url = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name);
       window.location.href = url;
     });
