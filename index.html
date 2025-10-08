@@ -13,16 +13,19 @@
   <style>
     body { font-family: -apple-system, system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
            margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-           background:#fff6e6; color:#3a2a22; }
+           background:#fff6e6; color:#3a2a22; flex-direction:column; }
     .card { text-align:center; padding:28px 22px; border-radius:16px;
             background:#ffffffcc; backdrop-filter: blur(6px);
-            box-shadow: 0 8px 28px rgba(0,0,0,.12); width:min(92vw,520px); }
+            box-shadow: 0 8px 28px rgba(0,0,0,.12); width:min(92vw,520px); margin-bottom:60px; }
     h1 { margin:10px 0 6px; font-size:28px; }
     p { margin:0 0 18px; opacity:.8; }
-    button { font-size:18px; padding:12px 20px; border-radius:12px; border:0;
-             background:#ff8800; color:#fff; cursor:pointer; }
-    button:active { transform: scale(0.98); }
+    button, a.download-btn {
+             font-size:18px; padding:12px 20px; border-radius:12px; border:0;
+             background:#ff8800; color:#fff; cursor:pointer; text-decoration:none; display:inline-block; margin:6px 0; }
+    button:active, a.download-btn:active { transform: scale(0.98); }
     .logo { width:92px; height:92px; border-radius:24px; background:#ff8800 url('icons/icon-192.png') center/80% no-repeat; margin:0 auto 8px; }
+    .progress { width:80%; height:12px; border-radius:6px; background:rgba(0,0,0,0.1); margin:16px auto; overflow:hidden; display:none; }
+    .progress-bar { width:0%; height:100%; background:#ff8800; transition:width 0.2s; }
     footer { position:fixed; bottom:10px; width:100%; text-align:center; font-size:12px; opacity:.6; }
   </style>
 </head>
@@ -31,24 +34,55 @@
     <div class="logo"></div>
     <h1>☕ OneSpark 星火</h1>
     <p>星火任務中心：下載與資料管理</p>
+
     <button id="run">啟動星火下載器</button>
+
+    <p style="margin:10px 0 4px; font-weight:bold;">📥 直接下載宗譜電子版</p>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf" download>下載 PDF</a><br>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx" download>下載 Word</a>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
     <p style="font-size:12px;opacity:.7;margin-top:12px;">若未安裝捷徑：請先建立「OneSpark 星火 下載器」捷徑</p>
   </div>
+
   <footer>可用「分享 → 加到主畫面」安裝 App</footer>
 
   <script>
+    // PWA service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
+
+    // 啟動捷徑
     document.getElementById('run').addEventListener('click', () => {
       const name = 'OneSpark 星火 下載器';
       const url = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name);
       window.location.href = url;
     });
+
+    // 模擬進度條動畫
+    const progress = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+    document.querySelectorAll('a.download-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        progress.style.display = 'block';
+        progressBar.style.width = '0%';
+        let width = 0;
+        const timer = setInterval(() => {
+          width += 10;
+          progressBar.style.width = width + '%';
+          if (width >= 100) {
+            clearInterval(timer);
+            setTimeout(()=>{ progress.style.display='none'; }, 500);
+          }
+        }, 150);
+      });
+    });
   </script>
 </body>
-</html>
-
 </html>
 
 
