@@ -1,170 +1,54 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OneSpark 星火 App</title>
-  <link rel="icon" href="icon-192.png" type="image/png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OneSpark 星火 ☕</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="OneSpark 星火">
+  <meta name="theme-color" content="#ff8800">
   <style>
-    body {
-      font-family: system-ui, "PingFang TC", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(180deg, #1a1a1a, #2b2b2b);
-      color: #f5f5f5;
-      text-align: center;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    header {
-      padding-top: 40px;
-    }
-
-    .app-icon {
-      width: 120px;
-      height: 120px;
-      border-radius: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(255,140,66,0.4);
-    }
-
-    h1 {
-      color: #ff8c42;
-      font-size: 2.2em;
-      margin: 0.3em 0;
-    }
-
-    p.subtitle {
-      color: #bbb;
-      font-size: 1.1em;
-      margin-top: 0;
-    }
-
-    section {
-      margin: 30px auto;
-      max-width: 400px;
-      background-color: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 25px 20px 40px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    button {
-      background-color: #ff8c42;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
-      margin: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #e6762d;
-    }
-
-    .progress-container {
-      width: 80%;
-      margin: 20px auto;
-      background-color: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      height: 16px;
-      overflow: hidden;
-      display: none;
-    }
-
-    .progress-bar {
-      width: 0%;
-      height: 100%;
-      background-color: #ff8c42;
-      transition: width 0.2s;
-    }
-
-    footer {
-      font-size: 0.9em;
-      color: #777;
-      margin-bottom: 20px;
-    }
+    body { font-family: -apple-system, system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
+           margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           background:#fff6e6; color:#3a2a22; }
+    .card { text-align:center; padding:28px 22px; border-radius:16px;
+            background:#ffffffcc; backdrop-filter: blur(6px);
+            box-shadow: 0 8px 28px rgba(0,0,0,.12); width:min(92vw,520px); }
+    h1 { margin:10px 0 6px; font-size:28px; }
+    p { margin:0 0 18px; opacity:.8; }
+    button { font-size:18px; padding:12px 20px; border-radius:12px; border:0;
+             background:#ff8800; color:#fff; cursor:pointer; }
+    button:active { transform: scale(0.98); }
+    .logo { width:92px; height:92px; border-radius:24px; background:#ff8800 url('icons/icon-192.png') center/80% no-repeat; margin:0 auto 8px; }
+    footer { position:fixed; bottom:10px; width:100%; text-align:center; font-size:12px; opacity:.6; }
   </style>
 </head>
 <body>
-
-  <header>
-    <img src="icon-192.png" alt="OneSpark Icon" class="app-icon">
+  <div class="card">
+    <div class="logo"></div>
     <h1>☕ OneSpark 星火</h1>
-    <p class="subtitle">智慧啟動，創造星火瞬間</p>
-  </header>
-
-  <section>
-    <h2>📥 下載宗譜電子版</h2>
-    <p>選擇檔案類型以下載：</p>
-
-    <button onclick="downloadFile('https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf')">
-      下載 PDF 檔
-    </button>
-
-    <button onclick="downloadFile('https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx')">
-      下載 Word 檔
-    </button>
-
-    <div class="progress-container" id="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-  </section>
-
-  <footer>
-    © 2025 OneSpark 星火 ｜ All Rights Reserved
-  </footer>
+    <p>星火任務中心：下載與資料管理</p>
+    <button id="run">啟動星火下載器</button>
+    <p style="font-size:12px;opacity:.7;margin-top:12px;">若未安裝捷徑：請先建立「OneSpark 星火 下載器」捷徑</p>
+  </div>
+  <footer>可用「分享 → 加到主畫面」安裝 App</footer>
 
   <script>
-    async function downloadFile(url) {
-      const progressContainer = document.getElementById('progress-container');
-      const progressBar = document.getElementById('progress-bar');
-      progressContainer.style.display = 'block';
-      progressBar.style.width = '0%';
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('下載失敗');
-
-        const reader = response.body.getReader();
-        const contentLength = +response.headers.get('Content-Length');
-        let receivedLength = 0;
-        let chunks = [];
-
-        while(true) {
-          const {done, value} = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          receivedLength += value.length;
-          if (contentLength) {
-            const progress = (receivedLength / contentLength * 100).toFixed(1);
-            progressBar.style.width = progress + '%';
-          }
-        }
-
-        const blob = new Blob(chunks);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = url.split('/').pop();
-        a.click();
-        URL.revokeObjectURL(a.href);
-
-        progressBar.style.width = '100%';
-        setTimeout(() => { progressContainer.style.display = 'none'; }, 800);
-        alert('☕ 檔案已下載完成！');
-      } catch (error) {
-        alert('⚠️ 下載過程發生錯誤，請稍後再試。');
-        progressContainer.style.display = 'none';
-      }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
+    document.getElementById('run').addEventListener('click', () => {
+      const name = 'OneSpark 星火 下載器';
+      const url = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name);
+      window.location.href = url;
+    });
   </script>
-
 </body>
 </html>
+
+</html>
+
 
