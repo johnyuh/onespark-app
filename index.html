@@ -65,7 +65,25 @@
       margin-top: 2rem;
       color: #666;
       font-size: 0.9rem;
+      position: relative;
     }
+    #donate-btn {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      background: linear-gradient(90deg, #ff758c, #ff7eb3);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 0.7em 1.3em;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+      z-index: 999;
+    }
+    #donate-btn:hover { transform: scale(1.08); }
     #ios-tip {
       display: none;
       background: #fff8e1;
@@ -92,9 +110,7 @@
       pointer-events: none;
       transition: opacity 0.4s;
     }
-    #toast.show {
-      opacity: 1;
-    }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -135,20 +151,18 @@
     <p>製作：OS星火 ｜ 更新日期：2025/10/12</p>
   </footer>
 
+  <button id="donate-btn" onclick="window.location.href='donate.html'">💖 贊助</button>
   <div id="toast">✅ 檔案已成功下載</div>
 
   <script>
-    // PWA 註冊
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
 
-    // 顯示 iPhone 提示
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       document.getElementById('ios-tip').style.display = 'block';
     }
 
-    // Toast 提示
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -156,7 +170,6 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // iOS 專用下載處理
     async function iosDownload(url, filename) {
       try {
         const res = await fetch(url);
@@ -174,12 +187,11 @@
         }
 
         setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-      } catch (e) {
+      } catch {
         alert("下載失敗，請稍後再試。");
       }
     }
 
-    // 綁定按鈕 + 進度條動畫
     const progress = document.getElementById('progress');
     const progressBar = document.getElementById('progress-bar');
     document.querySelectorAll('a.download-btn').forEach(btn => {
@@ -187,7 +199,6 @@
         e.preventDefault();
         const url = btn.getAttribute('href');
         const filename = url.split('/').pop();
-
         progress.style.display = 'block';
         progressBar.style.width = '0%';
         let width = 0;
@@ -199,12 +210,12 @@
             setTimeout(() => { progress.style.display = 'none'; }, 800);
           }
         }, 120);
-
         iosDownload(url, filename);
       });
     });
   </script>
 </body>
 </html>
+
 
 
