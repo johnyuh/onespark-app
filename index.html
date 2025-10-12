@@ -66,6 +66,35 @@
       color: #666;
       font-size: 0.9rem;
     }
+    #ios-tip {
+      display: none;
+      background: #fff8e1;
+      border: 1px solid #f0c36d;
+      color: #7c5a00;
+      margin: 1rem auto;
+      padding: 0.8rem;
+      border-radius: 10px;
+      max-width: 560px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    #toast.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -76,6 +105,13 @@
 
   <main>
     <h2>📘 族譜電子版下載</h2>
+
+    <div id="ios-tip">
+      📱 若使用 iPhone 或 iPad：<br>
+      請 <b>長按下載按鈕</b> → 選擇「<b>下載連結檔案</b>」，<br>
+      或點開後使用「<b>分享 → 儲存到檔案</b>」功能。
+    </div>
+
     <p style="margin:10px 0 4px; font-weight:bold;">📥 直接下載宗譜電子版</p>
 
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">
@@ -99,13 +135,28 @@
     <p>製作：OS星火 ｜ 更新日期：2025/10/12</p>
   </footer>
 
+  <div id="toast">✅ 檔案已成功下載</div>
+
   <script>
     // PWA 註冊
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
 
-    // iOS 專用下載處理：透過 Blob 觸發「分享 → 儲存到檔案」
+    // 顯示 iPhone 提示
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      document.getElementById('ios-tip').style.display = 'block';
+    }
+
+    // Toast 提示
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // iOS 專用下載處理
     async function iosDownload(url, filename) {
       try {
         const res = await fetch(url);
@@ -115,11 +166,11 @@
         a.href = blobUrl;
         a.download = filename;
 
-        // iOS Safari 不支援 download 屬性
         if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
           window.open(blobUrl, '_blank');
         } else {
           a.click();
+          showToast(`✅ ${filename} 已下載`);
         }
 
         setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
@@ -128,7 +179,7 @@
       }
     }
 
-    // 綁定下載按鈕 + 進度條動畫
+    // 綁定按鈕 + 進度條動畫
     const progress = document.getElementById('progress');
     const progressBar = document.getElementById('progress-bar');
     document.querySelectorAll('a.download-btn').forEach(btn => {
