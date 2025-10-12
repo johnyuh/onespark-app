@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>支持 OS星火的數位創作</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: "DFKai-SB", "Noto Sans TC", sans-serif;
+      background-color: #fafafa;
+      text-align: center;
+      color: #333;
+      padding: 2rem;
+    }
+    header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 20%;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #e91e63;
+      margin-top: 1rem;
+    }
+    #rate {
+      font-size: 1rem;
+      color: #555;
+      margin: 1rem 0;
+    }
+    #donate-input {
+      margin: 1rem auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    #donate-input input {
+      width: 100px;
+      text-align: right;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    #twd {
+      font-weight: bold;
+      color: #444;
+    }
+    #qrcode {
+      margin: 2rem auto;
+      width: 180px;
+      height: 180px;
+    }
+    #wallet {
+      font-size: 0.95rem;
+      word-break: break-all;
+      margin: 1rem auto;
+      max-width: 320px;
+      background: #fff;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: linear-gradient(90deg, #ff758c, #ff7eb3);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1.5rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    footer {
+      margin-top: 3rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/icons/icon-192.png" alt="OS星火 Logo">
+    <h1>💖 支持 OS星火的數位創作</h1>
+    <div id="rate">載入即時匯率中...</div>
+  </header>
+
+  <main>
+    <div id="donate-input">
+      <label for="dot">輸入金額：</label>
+      <input type="number" id="dot" min="0" step="0.01" placeholder="1.0">
+      <span>DOT ≈</span>
+      <span id="twd">-- 元</span>
+    </div>
+
+    <div id="qrcode"></div>
+    <div id="wallet">15mJmocR3yikpojcn13chojVfRNtFJJF8z3sia4GEm2jFm9Q</div>
+    <button onclick="copyAddress()">📋 複製地址</button>
+    <br>
+    <button onclick="window.location.href='index.html'">返回主頁</button>
+  </main>
+
+  <footer>
+    <p>感謝您的支持 — 每一份贊助都是 OS星火 延續創意的燃料 ✨</p>
+  </footer>
+
+  <script>
+    const address = "15mJmocR3yikpojcn13chojVfRNtFJJF8z3sia4GEm2jFm9Q";
+    let dotRate = 0;
+
+    // 建立 QR Code
+    new QRCode(document.getElementById("qrcode"), {
+      text: address,
+      width: 180,
+      height: 180
+    });
+
+    // 複製錢包地址
+    function copyAddress() {
+      navigator.clipboard.writeText(address).then(() => {
+        alert("✅ 已複製地址，可前往您的錢包進行轉帳");
+      });
+    }
+
+    // 取得即時 DOT → TWD 匯率
+    async function fetchRate() {
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=polkadot&vs_currencies=twd");
+        const data = await res.json();
+        dotRate = data.polkadot.twd;
+        document.getElementById("rate").innerHTML = `💰 1 DOT ≈ <b>${dotRate.toLocaleString()}</b> 新台幣`;
+      } catch (e) {
+        document.getElementById("rate").textContent = "⚠️ 無法取得即時匯率，請稍後再試";
+      }
+    }
+    fetchRate();
+
+    // 即時計算 TWD
+    document.getElementById("dot").addEventListener("input", function() {
+      const dot = parseFloat(this.value) || 0;
+      if (dotRate > 0) {
+        const twd = dot * dotRate;
+        document.getElementById("twd").textContent = `${twd.toLocaleString(undefined, {maximumFractionDigits:2})} 元`;
+      } else {
+        document.getElementById("twd").textContent = "-- 元";
+      }
+    });
+  </script>
+</body>
+</html>
