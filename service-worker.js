@@ -1,7 +1,5 @@
-// service-worker.js — OneSpark 星火 安全版快取
-const CACHE_NAME = "OneSparkCache-v1";
-
-// 建議快取的主要資源
+// service-worker.js — OneSpark 星火 安全版快取 (排除擴充資源)
+const CACHE_NAME = "OneSparkCache-v2";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -10,7 +8,6 @@ const FILES_TO_CACHE = [
   "./icon-512.png"
 ];
 
-// 安裝階段：快取核心檔案（忽略失敗資源）
 self.addEventListener("install", event => {
   console.log("🪄 [ServiceWorker] Installing...");
   event.waitUntil(
@@ -24,12 +21,11 @@ self.addEventListener("install", event => {
           console.warn("⚠️ 跳過無法快取的資源:", url, e);
         }
       }
-      self.skipWaiting(); // 立即啟用新版本
+      self.skipWaiting();
     })()
   );
 });
 
-// 啟用階段：清除舊快取
 self.addEventListener("activate", event => {
   console.log("⚙️ [ServiceWorker] Activating...");
   event.waitUntil(
@@ -48,30 +44,41 @@ self.addEventListener("activate", event => {
   );
 });
 
-// 讀取階段：優先使用快取，失敗時回網路
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return; // 只處理 GET
+  // 🧠 排除 chrome-extension 請求
+  const url = event.request.url;
+  if (url.startsWith("chrome-extension://")) {
+    // 完全略過這類請求，不干擾外掛
+    return;
+  }
+
+  // 只處理 GET 請求
+  if (event.request.method !== "GET") return;
+
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(event.request);
       if (cached) {
-        // 背景更新版本
+        // 嘗試背景更新
         event.waitUntil(
           fetch(event.request)
             .then(response => {
               if (response && response.status === 200) {
-                cache.put(event.request, response.clone());
+                cache.put(event.request, response.clone()).catch(() => {
+                  // 忽略擴充資源錯誤
+                });
               }
             })
             .catch(() => {})
         );
         return cached;
       }
+
       try {
         const response = await fetch(event.request);
         if (response && response.status === 200) {
-          cache.put(event.request, response.clone());
+          cache.put(event.request, response.clone()).catch(() => {});
         }
         return response;
       } catch (err) {
@@ -82,5 +89,4 @@ self.addEventListener("fetch", event => {
   );
 });
 
-console.log("✨ OneSpark 安全版 Service Worker 已啟動。");
-
+console.log("✨ OneSpark 安全版 Service Worker v2 已啟動（忽略擴充功能請求）。");
