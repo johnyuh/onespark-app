@@ -1,61 +1,86 @@
-const CACHE_NAME = 'onespark-cache-v3';
-const CORE_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+// service-worker.js — OneSpark 星火 安全版快取
+const CACHE_NAME = "OneSparkCache-v1";
+
+// 建議快取的主要資源
+const FILES_TO_CACHE = [
+  "./",
+  "./index.html",
+  "./email.js",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(CORE_ASSETS)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
+// 安裝階段：快取核心檔案（忽略失敗資源）
+self.addEventListener("install", event => {
+  console.log("🪄 [ServiceWorker] Installing...");
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
-    )
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      for (const url of FILES_TO_CACHE) {
+        try {
+          await cache.add(url);
+          console.log("✅ 已快取:", url);
+        } catch (e) {
+          console.warn("⚠️ 跳過無法快取的資源:", url, e);
+        }
+      }
+      self.skipWaiting(); // 立即啟用新版本
+    })()
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  // 檔案類型採用「網路優先＋快取備援」
-  if (url.pathname.endsWith('.pdf') || url.pathname.endsWith('.docx')) {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(req, clone));
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
-    return;
-  }
-
-  // 其他檔案「快取優先＋網路更新」
-  event.respondWith(
-    caches.match(req).then(cacheRes => {
-      const fetchPromise = fetch(req)
-        .then(res => {
-          if (res && res.status === 200) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(c => c.put(req, clone));
+// 啟用階段：清除舊快取
+self.addEventListener("activate", event => {
+  console.log("⚙️ [ServiceWorker] Activating...");
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log("🧹 移除舊快取:", key);
+            return caches.delete(key);
           }
-          return res;
         })
-        .catch(() => cacheRes);
-      return cacheRes || fetchPromise;
-    })
+      );
+      self.clients.claim();
+    })()
   );
 });
 
-self.addEventListener('message', event => {
-  if (event.data === 'skipWaiting') self.skipWaiting();
+// 讀取階段：優先使用快取，失敗時回網路
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return; // 只處理 GET
+  event.respondWith(
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(event.request);
+      if (cached) {
+        // 背景更新版本
+        event.waitUntil(
+          fetch(event.request)
+            .then(response => {
+              if (response && response.status === 200) {
+                cache.put(event.request, response.clone());
+              }
+            })
+            .catch(() => {})
+        );
+        return cached;
+      }
+      try {
+        const response = await fetch(event.request);
+        if (response && response.status === 200) {
+          cache.put(event.request, response.clone());
+        }
+        return response;
+      } catch (err) {
+        console.warn("🚫 無法從網路取得：", event.request.url);
+        return cached || Response.error();
+      }
+    })()
+  );
 });
+
+console.log("✨ OneSpark 安全版 Service Worker 已啟動。");
+
