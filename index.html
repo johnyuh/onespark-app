@@ -1,218 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>泉田喻氏宗譜 數位化下載</title>
-  <link rel="icon" href="icon-192.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OneSpark 星火 ☕</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="OneSpark 星火">
+  <meta name="theme-color" content="#ff8800">
   <style>
     body {
-      font-family: "DFKai-SB", "Noto Sans TC", sans-serif;
-      background-color: #f8f9fa;
-      color: #222;
-      text-align: center;
-      margin: 0;
-      padding: 0;
+      font-family: -apple-system, system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:#fff6e6; color:#3a2a22; flex-direction:column;
     }
-    header {
-      background-color: #2c3e50;
-      color: white;
-      padding: 1.2rem;
+    .card {
+      text-align:center; padding:28px 22px; border-radius:16px;
+      background:#ffffffcc; backdrop-filter: blur(6px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.12);
+      width:min(92vw,520px); margin-bottom:60px;
     }
-    h1 { margin: 0.3em 0; }
-    main {
-      max-width: 700px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 18px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-    }
+    h1 { margin:10px 0 6px; font-size:28px; }
+    p { margin:0 0 18px; opacity:.8; }
     a.download-btn {
-      display: block;
-      margin: 1em auto;
-      padding: 1em;
-      width: 90%;
-      max-width: 320px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: #fff;
-      background: linear-gradient(90deg, #007bff, #00bfff);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      transition: all 0.2s;
+      font-size:18px; padding:12px 20px; border-radius:12px; border:0;
+      background:#ff8800; color:#fff; cursor:pointer; text-decoration:none;
+      display:inline-block; margin:6px 0;
     }
-    a.download-btn:hover { transform: scale(1.05); }
-    #progress {
-      width: 80%;
-      max-width: 360px;
-      height: 10px;
-      background: #ddd;
-      margin: 2em auto;
-      border-radius: 5px;
-      display: none;
-      overflow: hidden;
+    a.download-btn:active { transform: scale(0.98); }
+    .logo {
+      width:92px; height:92px; border-radius:24px;
+      background:#ff8800 url('icons/icon-192.png') center/80% no-repeat;
+      margin:0 auto 8px;
     }
-    #progress-bar {
-      width: 0%;
-      height: 100%;
-      background: #28a745;
-      transition: width 0.1s linear;
+    .progress {
+      width:80%; height:12px; border-radius:6px;
+      background:rgba(0,0,0,0.1); margin:16px auto;
+      overflow:hidden; display:none;
+    }
+    .progress-bar {
+      width:0%; height:100%; background:#ff8800; transition:width 0.2s;
+    }
+    .complete {
+      display:none; margin-top:8px; color:#3a2a22; font-size:14px; opacity:0;
+      transition: opacity 0.6s;
     }
     footer {
-      margin-top: 2rem;
-      color: #666;
-      font-size: 0.9rem;
-      position: relative;
+      position:fixed; bottom:10px; width:100%; text-align:center;
+      font-size:12px; opacity:.6;
     }
-    #donate-btn {
-      position: fixed;
-      left: 20px;
-      bottom: 20px;
-      background: linear-gradient(90deg, #ff758c, #ff7eb3);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 0.7em 1.3em;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      transition: transform 0.2s;
-      z-index: 999;
-    }
-    #donate-btn:hover { transform: scale(1.08); }
-    #ios-tip {
-      display: none;
-      background: #fff8e1;
-      border: 1px solid #f0c36d;
-      color: #7c5a00;
-      margin: 1rem auto;
-      padding: 0.8rem;
-      border-radius: 10px;
-      max-width: 560px;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-    #toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s;
-    }
-    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>泉田喻氏宗譜 數位化檔案</h1>
-    <p>2025 整合版</p>
-  </header>
-
-  <main>
-    <h2>📘 族譜電子版下載</h2>
-
-    <div id="ios-tip">
-      📱 若使用 iPhone 或 iPad：<br>
-      請 <b>長按下載按鈕</b> → 選擇「<b>下載連結檔案</b>」，<br>
-      或點開後使用「<b>分享 → 儲存到檔案</b>」功能。
-    </div>
+  <div class="card">
+    <div class="logo"></div>
+    <h1>☕ OneSpark 星火</h1>
+    <p>星火任務中心：下載與資料管理</p>
 
     <p style="margin:10px 0 4px; font-weight:bold;">📥 直接下載宗譜電子版</p>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf" download>下載 橫式版 PDF</a><br>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf" download>下載 樹狀圖 PDF</a><br>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx" download>下載 橫式版 Word</a>
 
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">
-      下載 橫式版 PDF
-    </a>
-
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf">
-      下載 樹狀圖 PDF
-    </a>
-
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx">
-      下載 橫式版 Word
-    </a>
-
-    <div id="progress">
-      <div id="progress-bar"></div>
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progress-bar"></div>
     </div>
-  </main>
+    <div class="complete" id="complete">✅ 下載完成</div>
+  </div>
 
-  <footer>
-    <p>製作：OS星火 ｜ 更新日期：2025/10/12</p>
-  </footer>
-
-  <button id="donate-btn" onclick="window.location.href='donate.html'">💖 贊助</button>
-  <div id="toast">✅ 檔案已成功下載</div>
+  <footer>可用「分享 → 加到主畫面」安裝 App</footer>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-    }
+  // 註冊 PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  }
 
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      document.getElementById('ios-tip').style.display = 'block';
-    }
+  const progress = document.getElementById('progress');
+  const progressBar = document.getElementById('progress-bar');
+  const complete = document.getElementById('complete');
 
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
+  document.querySelectorAll('a.download-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = btn.href;
+      const fileName = decodeURIComponent(url.split('/').pop());
 
-    async function iosDownload(url, filename) {
+      progress.style.display = 'block';
+      progressBar.style.width = '0%';
+      complete.style.display = 'none';
+      complete.style.opacity = 0;
+
       try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-
-        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          window.open(blobUrl, '_blank');
-        } else {
-          a.click();
-          showToast(`✅ ${filename} 已下載`);
-        }
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-      } catch {
-        alert("下載失敗，請稍後再試。");
-      }
-    }
-
-    const progress = document.getElementById('progress');
-    const progressBar = document.getElementById('progress-bar');
-    document.querySelectorAll('a.download-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const url = btn.getAttribute('href');
-        const filename = url.split('/').pop();
-        progress.style.display = 'block';
-        progressBar.style.width = '0%';
+        // 模擬進度
         let width = 0;
         const timer = setInterval(() => {
-          width += 10;
+          width += 15;
           progressBar.style.width = width + '%';
-          if (width >= 100) {
-            clearInterval(timer);
-            setTimeout(() => { progress.style.display = 'none'; }, 800);
-          }
-        }, 120);
-        iosDownload(url, filename);
-      });
+          if (width >= 90) clearInterval(timer);
+        }, 150);
+
+        const res = await fetch(url);
+        const blob = await res.blob();
+        clearInterval(timer);
+        progressBar.style.width = '100%';
+
+        const file = new File([blob], fileName);
+        const blobUrl = URL.createObjectURL(blob);
+
+        // ✅ iOS Safari / PWA 模式
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: fileName,
+            text: '下載 OneSpark 星火 檔案',
+            files: [file]
+          });
+        } else {
+          // ✅ 備援（桌機／其他瀏覽器）
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+
+        setTimeout(() => {
+          progress.style.display = 'none';
+          complete.style.display = 'block';
+          complete.style.opacity = 1;
+          setTimeout(() => { complete.style.opacity = 0; }, 1500);
+        }, 600);
+
+      } catch (err) {
+        alert('下載失敗，請稍後重試');
+        progress.style.display = 'none';
+      }
     });
+  });
   </script>
 </body>
 </html>
