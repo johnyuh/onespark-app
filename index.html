@@ -6,7 +6,6 @@
   <title>泉田喻氏宗譜 數位化下載</title>
   <link rel="icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
-  <script src="config.js"></script>
   <style>
     body {
       font-family: "DFKai-SB", "Noto Sans TC", sans-serif;
@@ -35,8 +34,8 @@
       margin: 1em auto;
       padding: 1em;
       width: 90%;
-      max-width: 320px;
-      border-radius: 8px;
+      max-width: 360px;
+      border-radius: 10px;
       text-decoration: none;
       font-size: 1.05rem;
       font-weight: bold;
@@ -45,14 +44,13 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.15);
       transition: all 0.2s;
     }
-    a.download-btn:hover { transform: scale(1.05); }
-
+    a.download-btn:hover { transform: scale(1.04); }
     #progress {
       width: 80%;
-      max-width: 360px;
+      max-width: 420px;
       height: 10px;
       background: #ddd;
-      margin: 2em auto;
+      margin: 1.4em auto;
       border-radius: 5px;
       display: none;
       overflow: hidden;
@@ -68,84 +66,76 @@
       color: #666;
       font-size: 0.9rem;
     }
-
-    /* 右下角：贊助 + 郵件 */
+    /* 浮動按鈕 */
     #donate-btn, #mail-btn {
       position: fixed;
-      border: none;
+      bottom: 20px;
+      width: 56px; height: 56px;
       border-radius: 50%;
-      width: 54px;
-      height: 54px;
+      border: none;
       font-size: 24px;
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      transition: transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      transition: transform .2s;
       z-index: 999;
     }
-    #donate-btn {
-      left: 20px;
-      bottom: 20px;
-      background: linear-gradient(90deg, #ff758c, #ff7eb3);
-    }
-    #mail-btn {
-      right: 20px;
-      bottom: 20px;
-      background: linear-gradient(90deg, #007bff, #00bfff);
-    }
+    #donate-btn { left: 20px; background: linear-gradient(90deg,#ff758c,#ff7eb3); }
+    #mail-btn { right: 20px; background: linear-gradient(90deg,#007bff,#00bfff); }
     #donate-btn:hover, #mail-btn:hover { transform: scale(1.08); }
-
-    /* 郵件表單彈窗 */
+    /* 郵件表單 */
     #mail-form {
       position: fixed;
-      bottom: 90px;
+      bottom: 86px;
       right: 20px;
-      width: 300px;
+      width: 320px;
       background: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
       border-radius: 12px;
-      padding: 1rem;
+      padding: 12px;
       display: none;
       flex-direction: column;
       z-index: 1000;
-      animation: fadeIn 0.3s;
+      animation: fadeIn .25s;
     }
+    #mail-form h3 { margin: 0 0 8px; font-size: 16px; }
     #mail-form input, #mail-form textarea {
       width: 100%;
       margin: 6px 0;
-      padding: 8px;
+      padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
       font-family: inherit;
+      font-size: 14px;
+    }
+    #mail-form .actions {
+      display: flex; gap: 8px; margin-top: 8px;
     }
     #mail-form button {
+      flex: 1;
       background: #007bff;
       color: #fff;
       border: none;
-      padding: 8px;
-      border-radius: 6px;
+      padding: 10px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 14px;
     }
-    #mail-form button:hover { background: #005fcc; }
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(10px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
-
+    #mail-cancel { background: #6c757d; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
     /* 通知 */
     #toast {
       position: fixed;
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0,0,0,.85);
       color: #fff;
       padding: 12px 20px;
       border-radius: 8px;
-      font-size: 0.95rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s;
+      font-size: .95rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s;
     }
     #toast.show { opacity: 1; }
   </style>
@@ -158,9 +148,12 @@
 
   <main>
     <h2>📘 族譜電子版下載</h2>
+    <p style="margin:10px 0 6px; font-weight:bold;">📥 直接下載宗譜電子版</p>
+
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">下載 橫式版 PDF</a>
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf">下載 樹狀圖 PDF</a>
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx">下載 橫式版 Word</a>
+
     <div id="progress"><div id="progress-bar"></div></div>
   </main>
 
@@ -169,18 +162,72 @@
   </footer>
 
   <button id="donate-btn" onclick="window.location.href='donate.html'">💖</button>
-  <button id="mail-btn">📧</button>
+  <button id="mail-btn" title="留言信箱">📧</button>
 
   <div id="mail-form">
+    <h3>📬 留言給 OneSpark 星火</h3>
     <input id="sender-name" placeholder="您的姓名">
-    <input id="sender-email" placeholder="您的 Email">
+    <input id="sender-email" placeholder="您的 Email（選填）">
     <textarea id="sender-message" rows="4" placeholder="留言內容"></textarea>
-    <button id="send-mail">送出留言</button>
+    <div class="actions">
+      <button id="mail-cancel" type="button">取消</button>
+      <button id="send-mail" type="button">送出留言</button>
+    </div>
   </div>
 
   <div id="toast"></div>
 
+  <script>
+  // PWA 可有可無，若你已有 service-worker.js，會自動註冊
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  }
+
+  // 下載：iOS18 支援 share 儲存到檔案；其他平台直接下載
+  const progress = document.getElementById('progress');
+  const progressBar = document.getElementById('progress-bar');
+  function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
+  document.querySelectorAll('a.download-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = btn.href;
+      const fileName = decodeURIComponent(url.split('/').pop());
+
+      progress.style.display = 'block';
+      progressBar.style.width = '0%';
+      let width = 0;
+      const timer = setInterval(() => { width += 12; progressBar.style.width = width + '%'; if (width >= 100) clearInterval(timer); }, 150);
+
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        clearInterval(timer);
+        progressBar.style.width = '100%';
+        const file = new File([blob], fileName);
+        const blobUrl = URL.createObjectURL(blob);
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: fileName, text: '下載 OneSpark 星火 檔案', files: [file] });
+        } else {
+          const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          showToast(`✅ ${fileName} 已下載`);
+        }
+        setTimeout(()=>{ progress.style.display='none'; showToast('✅ 下載完成'); }, 600);
+        setTimeout(()=> URL.revokeObjectURL(blobUrl), 60000);
+      } catch(e) {
+        progress.style.display='none'; alert('下載失敗，請稍後再試');
+      }
+    });
+  });
+
+  // 留言窗開關
+  const mailBtn = document.getElementById('mail-btn');
+  const mailForm = document.getElementById('mail-form');
+  const cancelBtn = document.getElementById('mail-cancel');
+  mailBtn.addEventListener('click', () => { mailForm.style.display = (mailForm.style.display === 'flex') ? 'none' : 'flex'; });
+  cancelBtn.addEventListener('click', () => { mailForm.style.display = 'none'; });
+  </script>
+
   <script src="email.js"></script>
 </body>
 </html>
-
