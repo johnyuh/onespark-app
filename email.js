@@ -1,4 +1,3 @@
-// email.js - 呼叫安全 API 寫入 GitHub 並寄通知信
 const toast = document.getElementById('toast');
 const mailForm = document.getElementById('mail-form');
 const sendBtn = document.getElementById('send-mail');
@@ -17,7 +16,7 @@ sendBtn.addEventListener('click', async () => {
   if (!name || !message) return showToast('請填寫姓名與留言內容');
 
   try {
-    const res = await fetch('/api/github-email-proxy', {
+    const res = await fetch('https://onespark-app.vercel.app/api/github-email-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, message })
@@ -39,3 +38,4 @@ sendBtn.addEventListener('click', async () => {
     showToast('⚠️ 無法連線伺服器');
   }
 });
+
