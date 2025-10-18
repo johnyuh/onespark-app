@@ -83,12 +83,12 @@
       z-index: 999;
     }
     #donate-btn:hover { transform: scale(1.08); }
-    #toast {
+    #toast, #update-toast {
       position: fixed;
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       color: #fff;
       padding: 12px 20px;
       border-radius: 8px;
@@ -97,7 +97,8 @@
       pointer-events: none;
       transition: opacity 0.4s;
     }
-    #toast.show { opacity: 1; }
+    #toast.show, #update-toast.show { opacity: 1; pointer-events:auto; }
+    #update-toast { background: #007bff; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -108,7 +109,6 @@
 
   <main>
     <h2>📘 族譜電子版下載</h2>
-
     <p style="margin:10px 0 4px; font-weight:bold;">📥 直接下載宗譜電子版</p>
 
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">下載 橫式版 PDF</a>
@@ -123,11 +123,30 @@
   </footer>
 
   <button id="donate-btn" onclick="window.location.href='donate.html'">💖 贊助</button>
-  <div id="toast">✅ 檔案已成功下載</div>
+  <div id="toast"></div>
+  <div id="update-toast">⚡ 發現新版本，點此更新</div>
 
   <script>
+  const CACHE_VERSION = 'v3';
+
+  // ✅ 註冊 service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    navigator.serviceWorker.register('./service-worker.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            const updateToast = document.getElementById('update-toast');
+            updateToast.classList.add('show');
+            updateToast.onclick = () => {
+              newWorker.postMessage('skipWaiting');
+              updateToast.textContent = '🔄 重新載入中...';
+              setTimeout(() => location.reload(), 800);
+            };
+          }
+        });
+      });
+    });
   }
 
   const progress = document.getElementById('progress');
@@ -148,7 +167,6 @@
 
       progress.style.display = 'block';
       progressBar.style.width = '0%';
-
       let width = 0;
       const timer = setInterval(() => {
         width += 12;
@@ -165,7 +183,7 @@
         const file = new File([blob], fileName);
         const blobUrl = URL.createObjectURL(blob);
 
-        // ✅ iOS18 / Safari / PWA 支援直接分享儲存
+        // ✅ iOS18 可直接使用 share 觸發儲存到檔案
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: fileName,
@@ -173,7 +191,6 @@
             files: [file]
           });
         } else {
-          // 備援：其他瀏覽器直接觸發下載
           const a = document.createElement('a');
           a.href = blobUrl;
           a.download = fileName;
@@ -198,5 +215,3 @@
   </script>
 </body>
 </html>
-
-
