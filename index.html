@@ -6,6 +6,7 @@
   <title>泉田喻氏宗譜 數位化下載</title>
   <link rel="icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
+  <script src="config.js"></script>
   <style>
     body {
       font-family: "DFKai-SB", "Noto Sans TC", sans-serif;
@@ -45,6 +46,7 @@
       transition: all 0.2s;
     }
     a.download-btn:hover { transform: scale(1.05); }
+
     #progress {
       width: 80%;
       max-width: 360px;
@@ -66,24 +68,72 @@
       color: #666;
       font-size: 0.9rem;
     }
-    #donate-btn {
+
+    /* 右下角：贊助 + 郵件 */
+    #donate-btn, #mail-btn {
       position: fixed;
-      left: 20px;
-      bottom: 20px;
-      background: linear-gradient(90deg, #ff758c, #ff7eb3);
-      color: white;
       border: none;
-      border-radius: 50px;
-      padding: 0.7em 1.3em;
-      font-size: 1rem;
-      font-weight: bold;
+      border-radius: 50%;
+      width: 54px;
+      height: 54px;
+      font-size: 24px;
+      color: #fff;
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       transition: transform 0.2s;
       z-index: 999;
     }
-    #donate-btn:hover { transform: scale(1.08); }
-    #toast, #update-toast {
+    #donate-btn {
+      left: 20px;
+      bottom: 20px;
+      background: linear-gradient(90deg, #ff758c, #ff7eb3);
+    }
+    #mail-btn {
+      right: 20px;
+      bottom: 20px;
+      background: linear-gradient(90deg, #007bff, #00bfff);
+    }
+    #donate-btn:hover, #mail-btn:hover { transform: scale(1.08); }
+
+    /* 郵件表單彈窗 */
+    #mail-form {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 300px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    #mail-form input, #mail-form textarea {
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    #mail-form button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #mail-form button:hover { background: #005fcc; }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* 通知 */
+    #toast {
       position: fixed;
       bottom: 30px;
       left: 50%;
@@ -97,8 +147,7 @@
       pointer-events: none;
       transition: opacity 0.4s;
     }
-    #toast.show, #update-toast.show { opacity: 1; pointer-events:auto; }
-    #update-toast { background: #007bff; cursor:pointer; }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -109,12 +158,9 @@
 
   <main>
     <h2>📘 族譜電子版下載</h2>
-    <p style="margin:10px 0 4px; font-weight:bold;">📥 直接下載宗譜電子版</p>
-
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">下載 橫式版 PDF</a>
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf">下載 樹狀圖 PDF</a>
     <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx">下載 橫式版 Word</a>
-
     <div id="progress"><div id="progress-bar"></div></div>
   </main>
 
@@ -122,96 +168,19 @@
     <p>製作：OS星火 ｜ 更新日期：2025/10/18</p>
   </footer>
 
-  <button id="donate-btn" onclick="window.location.href='donate.html'">💖 贊助</button>
+  <button id="donate-btn" onclick="window.location.href='donate.html'">💖</button>
+  <button id="mail-btn">📧</button>
+
+  <div id="mail-form">
+    <input id="sender-name" placeholder="您的姓名">
+    <input id="sender-email" placeholder="您的 Email">
+    <textarea id="sender-message" rows="4" placeholder="留言內容"></textarea>
+    <button id="send-mail">送出留言</button>
+  </div>
+
   <div id="toast"></div>
-  <div id="update-toast">⚡ 發現新版本，點此更新</div>
 
-  <script>
-  const CACHE_VERSION = 'v3';
-
-  // ✅ 註冊 service worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').then(reg => {
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            const updateToast = document.getElementById('update-toast');
-            updateToast.classList.add('show');
-            updateToast.onclick = () => {
-              newWorker.postMessage('skipWaiting');
-              updateToast.textContent = '🔄 重新載入中...';
-              setTimeout(() => location.reload(), 800);
-            };
-          }
-        });
-      });
-    });
-  }
-
-  const progress = document.getElementById('progress');
-  const progressBar = document.getElementById('progress-bar');
-  const toast = document.getElementById('toast');
-
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
-
-  document.querySelectorAll('a.download-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const url = btn.href;
-      const fileName = decodeURIComponent(url.split('/').pop());
-
-      progress.style.display = 'block';
-      progressBar.style.width = '0%';
-      let width = 0;
-      const timer = setInterval(() => {
-        width += 12;
-        progressBar.style.width = width + '%';
-        if (width >= 100) clearInterval(timer);
-      }, 150);
-
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        clearInterval(timer);
-        progressBar.style.width = '100%';
-
-        const file = new File([blob], fileName);
-        const blobUrl = URL.createObjectURL(blob);
-
-        // ✅ iOS18 可直接使用 share 觸發儲存到檔案
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: fileName,
-            text: '下載 OneSpark 星火 檔案',
-            files: [file]
-          });
-        } else {
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          showToast(`✅ ${fileName} 已下載`);
-        }
-
-        setTimeout(() => {
-          progress.style.display = 'none';
-          showToast('✅ 下載完成');
-        }, 600);
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-      } catch {
-        alert("下載失敗，請稍後再試。");
-        progress.style.display = 'none';
-      }
-    });
-  });
-  </script>
+  <script src="email.js"></script>
 </body>
 </html>
+
