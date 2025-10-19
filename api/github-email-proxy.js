@@ -1,5 +1,15 @@
-// api/github-email-proxy.js - Vercel 無伺服器函式
+// api/github-email-proxy.js
 export default async function handler(req, res) {
+  // === ✅ 新增 CORS 設定區 ===
+  res.setHeader("Access-Control-Allow-Origin", "https://johnyuh.github.io");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    // 預檢請求（preflight），直接結束
+    return res.status(200).end();
+  }
+  // ==============================
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -19,10 +29,6 @@ export default async function handler(req, res) {
     const GITHUB_REPO = "onespark-app";
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-    if (!GITHUB_TOKEN) {
-      return res.status(500).json({ error: "Missing GITHUB_TOKEN environment variable" });
-    }
-
     const ghRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${fileName}`, {
       method: "PUT",
       headers: {
@@ -39,23 +45,6 @@ export default async function handler(req, res) {
       const errText = await ghRes.text();
       console.error("GitHub Error:", errText);
       return res.status(502).json({ error: "GitHub write failed", detail: errText });
-    }
-
-    const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-    if (SENDGRID_API_KEY) {
-      await fetch("https://api.sendgrid.com/v3/mail/send", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${SENDGRID_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: "john.ext500@gmail.com" }] }],
-          from: { email: "no-reply@onespark.app", name: "OneSpark 星火" },
-          subject: "OneSpark 星火 - 新留言通知",
-          content: [{ type: "text/plain", value: content }]
-        })
-      });
     }
 
     return res.status(200).json({ ok: true });
