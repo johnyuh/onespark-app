@@ -76,7 +76,7 @@
       font-size: 24px;
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       transition: transform .2s;
       z-index: 999;
     }
@@ -150,15 +150,15 @@
     <h2>📘 族譜電子版下載</h2>
     <p style="margin:10px 0 6px; font-weight:bold;">📥 直接下載宗譜電子版</p>
 
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf">下載 橫式版 PDF</a>
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf">下載 樹狀圖 PDF</a>
-    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx">下載 橫式版 Word</a>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.pdf" download="泉田喻氏宗譜_2025整合本_橫式版.pdf" rel="noopener">下載 橫式版 PDF</a>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf" download="泉田喻氏宗譜_派代表樹狀圖_2025新版.pdf" rel="noopener">下載 樹狀圖 PDF</a>
+    <a class="download-btn" href="https://johnyuh.github.io/onespark-app/files/泉田喻氏宗譜_2025整合本_橫式版.docx" download="泉田喻氏宗譜_2025整合本_橫式版.docx" rel="noopener">下載 橫式版 Word</a>
 
     <div id="progress"><div id="progress-bar"></div></div>
   </main>
 
   <footer>
-    <p>製作：OS星火 ｜ 更新日期：2025/11/12</p>
+    <p>製作：OS星火 ｜ 更新日期：2025/10/18</p>
   </footer>
 
   <button id="donate-btn" onclick="window.location.href='donate.html'">💖</button>
@@ -178,58 +178,36 @@
   <div id="toast"></div>
 
   <script>
-  // PWA 可有可無，若你已有 service-worker.js，會自動註冊
+  // PWA：若有 service-worker.js 會自動註冊
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
   }
 
-  // 下載：iOS18 支援 share 儲存到檔案；其他平台直接下載
-  const progress = document.getElementById('progress');
-  const progressBar = document.getElementById('progress-bar');
-  function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
+  // 提示訊息（保留可用於其他通知）
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  }
+
+  // ✅ 修正：移除原本攔截下載的事件（讓 <a download> 原生下載生效）
   document.querySelectorAll('a.download-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const url = btn.href;
-      const fileName = decodeURIComponent(url.split('/').pop());
-
-      progress.style.display = 'block';
-      progressBar.style.width = '0%';
-      let width = 0;
-      const timer = setInterval(() => { width += 12; progressBar.style.width = width + '%'; if (width >= 100) clearInterval(timer); }, 150);
-
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        clearInterval(timer);
-        progressBar.style.width = '100%';
-        const file = new File([blob], fileName);
-        const blobUrl = URL.createObjectURL(blob);
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: fileName, text: '下載 OneSpark 星火 檔案', files: [file] });
-        } else {
-          const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          showToast(`✅ ${fileName} 已下載`);
-        }
-        setTimeout(()=>{ progress.style.display='none'; showToast('✅ 下載完成'); }, 600);
-        setTimeout(()=> URL.revokeObjectURL(blobUrl), 60000);
-      } catch(e) {
-        progress.style.display='none'; alert('下載失敗，請稍後再試');
-      }
-    });
+    const clone = btn.cloneNode(true); // 透過克隆移除所有事件監聽
+    btn.replaceWith(clone);
   });
 
   // 留言窗開關
   const mailBtn = document.getElementById('mail-btn');
   const mailForm = document.getElementById('mail-form');
   const cancelBtn = document.getElementById('mail-cancel');
-  mailBtn.addEventListener('click', () => { mailForm.style.display = (mailForm.style.display === 'flex') ? 'none' : 'flex'; });
+  mailBtn.addEventListener('click', () => {
+    mailForm.style.display = (mailForm.style.display === 'flex') ? 'none' : 'flex';
+  });
   cancelBtn.addEventListener('click', () => { mailForm.style.display = 'none'; });
   </script>
 
   <script src="email.js"></script>
 </body>
 </html>
-
 
