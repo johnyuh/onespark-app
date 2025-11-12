@@ -158,7 +158,7 @@
   </main>
 
   <footer>
-    <p>製作：OS星火 ｜ 更新日期：2025/10/18</p>
+    <p>製作：OS星火 ｜ 更新日期：2025/11/12</p>
   </footer>
 
   <button id="donate-btn" onclick="window.location.href='donate.html'">💖</button>
@@ -196,6 +196,36 @@
     const clone = btn.cloneNode(true); // 透過克隆移除所有事件監聽
     btn.replaceWith(clone);
   });
+
+  // 🧭 Safari 專用下載修正：部分 Safari 會忽略 <a download> 或改為預覽 PDF
+  (function(){
+    var ua = navigator.userAgent;
+    var isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    if (!isSafari) return; // 只有 Safari 啟用修正
+
+    document.querySelectorAll('a.download-btn').forEach(function(a){
+      a.addEventListener('click', async function(e){
+        try {
+          e.preventDefault();
+          const res = await fetch(a.href, { credentials: 'omit' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const fileName = decodeURIComponent(a.getAttribute('download') || a.href.split('/').pop());
+          const tmp = document.createElement('a');
+          tmp.href = blobUrl;
+          tmp.download = fileName;
+          document.body.appendChild(tmp);
+          tmp.click();
+          tmp.remove();
+          setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
+        } catch (err) {
+          alert('下載失敗：' + err.message);
+        }
+      });
+    });
+  })();
+
 
   // 留言窗開關
   const mailBtn = document.getElementById('mail-btn');
